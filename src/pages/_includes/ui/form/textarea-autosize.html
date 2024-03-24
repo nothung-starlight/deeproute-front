@@ -1,0 +1,2 @@
+{% assign name = include.name %}
+<textarea class="form-control{% if include.class %} {{ include.class }}{% endif %}" data-bs-toggle="autosize" name={{name}} placeholder="请输入"{% if include.rows %} rows="{{ include.rows }}"{% endif %}></textarea>

@@ -1,0 +1,47 @@
+<form action="https://httpbin.org/get" method="get" autocomplete="off" novalidate>
+	<div class="mb-3">
+		<label class="form-label">用户名</label>
+		<input type="text" name="username"  class="form-control" >
+	</div>
+	<div class="mb-2">
+		<label class="form-label">
+			密码
+		</label>
+		{% include ui/form/input-group.html type="password" append-button="eye:Show password" flat=true %}
+	</div>
+
+	<div class="form-footer">
+		<button type="button" class="btn btn-primary w-100" id="button">登录</button>
+	</div>
+</form>
+<script>
+	document.addEventListener('DOMContentLoaded', function() {
+		const button = document.getElementById("button")
+		const username=document.getElementsByName("username")[0]
+		const password=document.getElementsByName("password")[0]
+		button.addEventListener('click', function(event) {
+			const url=`https://httpbin.org/get?username=${encodeURIComponent(username.value)}&password=${encodeURIComponent(password.value)}`
+			fetch(url, {
+				method: 'GET',
+			})
+				.then(response => {
+					if (response.ok) {
+						return response.json();
+					}
+					throw new Error('Network response was not ok.');
+				})
+				.then(data => {
+					console.log(data);
+					const isValid = true; // 假设提交验证结果为 true
+					if (isValid) {
+						window.location.href = '{{ site.base }}/form-elements.html'; // 重定向到指定页面
+					}
+				})
+				.catch(error => {
+					console.error('Error:', error);
+				});
+
+
+		});
+	});
+</script>
