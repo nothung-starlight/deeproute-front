@@ -116,16 +116,26 @@ layout: default
 					</div>
 					<div class="card-footer text-end custom-margin-2">
 						<div class="d-flex">
-							<button type="button" id="button" class="btn btn-primary ms-auto">保存上传</button>
+							<button type="button" id="button"  class="btn btn-primary ms-auto">保存上传</button>
 						</div>
 					</div>
 		</div>
 			</form>
+
 </div>
-
-
+{% include ui/success.html id="success" size="sm" info="上传成功" %}
+{% include ui/fail.html id="fail" size="sm" info="上传失败" %}
+{% include ui/fail.html id="zip" size="sm" info="请上传 Zip 格式文件" %}
+{% include ui/loading.html id="loading" size="sm" info="上传中" %}
 <script>
+	let controller = new AbortController();
+	let signal = controller.signal;
 	document.addEventListener("DOMContentLoaded", function() {
+
+		const loading = document.getElementById("loading")
+		const success = document.getElementById("success")
+		const fail = document.getElementById("fail")
+		const zip = document.getElementById("zip")
 		const button = document.getElementById("button")
 		const file = document.getElementById("upload")
 		const filename = document.getElementById("filename")
@@ -143,8 +153,10 @@ layout: default
 				if (file.files[0].name.split(".").pop().toLowerCase() === "zip") {
 					filename.textContent = file.files[0].name;
 				} else {
-					file.files.remove(0)
-					alert("请上传 Zip 格式文件")
+					file.value = null;
+					filename.textContent = '未选择文件';
+					zip.classList.add('show');
+					zip.style.display = 'block';
 				}
 			} else {
 				filename.textContent = '未选择文件';
@@ -153,6 +165,8 @@ layout: default
 
 		button.addEventListener('click', function(event) {
 			const formData = new FormData();
+			controller=new AbortController();
+			signal = controller.signal;
 			formData.append('file', file.files[0]); // 获取文件输入框中选择的文件
 			formData.append('location', location.value);
 			formData.append('date', date.value);
@@ -166,23 +180,52 @@ layout: default
 			const url=`https://httpbin.org/post`
 			fetch(url, {
 				method: 'POST',
-				body: formData
+				body: formData,
+				signal: signal
 			})
 				.then(response => {
+					loading.classList.add('hide');
+					loading.style.display = 'none';
 					if (response.ok) {
 						return response.json();
 					}
+					fail.classList.add('show');
+					fail.style.display = 'block';
 					throw new Error('Network response was not ok.');
 				})
 				.then(data => {
 					console.log(data);
+					success.classList.add('show');
+					success.style.display = 'block';
 
 				})
 				.catch(error => {
 					console.error('Error:', error);
+					loading.classList.add('hide');
+					loading.style.display = 'none';
+					fail.classList.add('show');
+					fail.style.display = 'block';
 				});
-
+			loading.classList.add('show');
+			loading.style.display = 'block';
 
 		});
 	});
+	function closeSuccessModal(modalId) {
+		var modal = document.getElementById(modalId); // 获取要关闭的模态框元素
+		modal.classList.add('hide');
+		modal.style.display = 'none';
+		location.reload();
+	}
+	function closeFailModal(modalId) {
+		var modal = document.getElementById(modalId); // 获取要关闭的模态框元素
+		modal.classList.add('hide');
+		modal.style.display = 'none';
+	}
+	function closeLoadingModal(modalId) {
+		var modal = document.getElementById(modalId); // 获取要关闭的模态框元素
+		modal.classList.add('hide');
+		modal.style.display = 'none';
+		controller.abort();
+	}
 </script>

@@ -1,0 +1,27 @@
+{% assign id = include.id %}
+{% assign size = include['size'] %}
+{% assign info = include.info %}
+
+
+{% capture_global modals %}
+<style>
+	.mt-15 {
+		margin-top: 15px;
+	}
+</style>
+<div class="modal modal-blur fade" id="{{ id }}" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-dialog{% if size%} modal-{{ size }}{% endif %}{% unless include.top %} modal-dialog-centered{% endunless %}{% if include.scrollable %} modal-dialog-scrollable{% endif %}" role="document">
+		<div class="modal-content">
+
+			<div class="modal-status bg-success"></div>
+			<div class="modal-body text-center py-4">
+
+				{% include ui/progress.html indeterminate=true color="green" %}
+				<div class="mt-15"></div>
+				<h3>{{info}}</h3>
+				<button type="button" class="btn btn-primary"  onclick="closeLoadingModal('{{id}}')">取消上传</button>
+			</div>
+		</div>
+	</div>
+</div>
+{% endcapture_global %}

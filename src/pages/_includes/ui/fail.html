@@ -1,0 +1,21 @@
+{% assign id = include.id %}
+{% assign size = include['size'] %}
+{% assign info = include.info %}
+
+
+{% capture_global modals %}
+<div class="modal modal-blur fade" id="{{ id }}" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-dialog{% if size%} modal-{{ size }}{% endif %}{% unless include.top %} modal-dialog-centered{% endunless %}{% if include.scrollable %} modal-dialog-scrollable{% endif %}" role="document">
+		<div class="modal-content">
+			<button type="button" class="btn-close"  onclick="closeFailModal('{{id}}')"></button>
+			<div class="modal-status bg-danger"></div>
+			<div class="modal-body text-center py-4">
+
+				{% include ui/icon.html icon="alert-triangle" color="danger" size="lg" class="mb-2" %}
+				<h3>{{info}}</h3>
+
+			</div>
+		</div>
+	</div>
+</div>
+{% endcapture_global %}
