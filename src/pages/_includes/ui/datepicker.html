@@ -10,7 +10,7 @@
 
 
 {% if include.inline %}
-	<div class="datepicker-inline" id="datepicker-{{ id }}"></div>
+	<div class="datepicker-inline" id="{{ id }}"></div>
 {% elsif include.layout == 'icon' %}
 	<div class="input-icon{% if include.class %} {{ include.class }}{% endif %}">
 		{{ input | replace: include.class, '' }}
@@ -35,6 +35,7 @@
 
 		window.Litepicker && ({% if jekyll.environment == 'development' %}window.tabler_datepicker["datepicker-{{ id }}"] = {% endif %}new Litepicker({
 			element: document.getElementById('datepicker-{{ id }}'),
+			lang: 'zh',
 			buttonText: {
 				previousMonth: `{% capture icon %}{% include ui/icon.html icon="chevron-left" %}{% endcapture %}{{ icon | strip }}`,
 				nextMonth: `{% capture icon %}{% include ui/icon.html icon="chevron-right" %}{% endcapture %}{{ icon | strip }}`,

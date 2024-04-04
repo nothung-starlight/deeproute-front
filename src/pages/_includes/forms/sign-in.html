@@ -7,7 +7,7 @@
 		<label class="form-label">
 			密码
 		</label>
-		{% include ui/form/input-group.html type="password" append-button="eye:Show password" flat=true %}
+		<input type=password name="password" class="form-control">
 	</div>
 
 	<div class="form-footer">
@@ -38,7 +38,7 @@
 					console.log(data);
 					const isValid = true; // 假设提交验证结果为 true
 					if (isValid) {
-						window.location.href = '{{ site.base }}/form-elements.html'; // 重定向到指定页面
+						window.location.href = '{{ site.base }}/workbench.html'; // 重定向到指定页面
 					}
 				})
 				.catch(error => {

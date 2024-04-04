@@ -66,49 +66,43 @@ layout: default
 					</div>
 					<div class="card-body">
 				<div class="row">
-					<div class="col-md-4 col-xl-8 custom-margin-1">
+					<div class="col-md-4 col-xl-4 custom-margin-1">
 						<label class="form-label">测评地点</label>
 							<input type="text" name="location" class="form-control" placeholder="请输入">
 
 					</div>
 
-					<div class="col-md-4 col-xl-8 custom-margin-1">
-						<label class="form-label">测评日期</label>
-							{% include ui/datepicker.html id="icon" layout="icon" %}
-
-					</div>
-
-					<div class="col-md-3 col-xl-6 custom-margin-1">
+					<div class="col-md-3 col-xl-3 custom-margin-1">
 						<label class="form-label">测评人员</label>
 						<input type="text" name="name" class="form-control" placeholder="请输入">
 					</div>
 				</div>
 					<div class="row custom-margin-2">
-						<div class="col-md-3 col-xl-6 custom-margin-1">
+						<div class="col-md-3 col-xl-3 custom-margin-1">
 							<label class="form-label">车辆品牌</label>
 							<input type="text" name="brand" class="form-control" placeholder="请输入">
 
 						</div>
 
-						<div class="col-md-5 col-xl-10 custom-margin-1">
+						<div class="col-md-5 col-xl-5 custom-margin-1">
 							<label class="form-label">车辆型号</label>
 							<input type="text" name="model" class="form-control" placeholder="型号/年份">
 
 						</div>
 
-						<div class="col-md-3 col-xl-6 custom-margin-1">
+						<div class="col-md-3 col-xl-3 custom-margin-1">
 							<label class="form-label">智驾版本</label>
 							<input type="text" name="version" class="form-control" placeholder="请输入">
 						</div>
 					</div>
 					<div class="row custom-margin-2">
-						<div class="col-md-11 col-xl-22 custom-margin-1">
+						<div class="col-md-11 col-xl-11 custom-margin-1">
 							<label class="form-label">测评路线</label>
 							<input type="text" name="path" class="form-control" placeholder="请输入">
 						</div>
 					</div>
 					<div class="row custom-margin-2">
-						<div class="col-md-11 col-xl-22 custom-margin-1">
+						<div class="col-md-11 col-xl-11 custom-margin-1">
 						<label class="form-label">其他说明</label>
 							{% include ui/form/textarea-autosize.html name="info"%}
 						</div>
@@ -140,7 +134,6 @@ layout: default
 		const file = document.getElementById("upload")
 		const filename = document.getElementById("filename")
 		const location=document.getElementsByName("location")[0]
-		const date=document.getElementsByName("date")[0]
 		const name=document.getElementsByName("name")[0]
 		const brand=document.getElementsByName("brand")[0]
 		const model=document.getElementsByName("model")[0]
@@ -169,7 +162,6 @@ layout: default
 			signal = controller.signal;
 			formData.append('file', file.files[0]); // 获取文件输入框中选择的文件
 			formData.append('location', location.value);
-			formData.append('date', date.value);
 			formData.append('name', name.value);
 			formData.append('brand', brand.value);
 			formData.append('model', model.value);

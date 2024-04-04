@@ -1,5 +1,443 @@
 ---
 
 menu: 测评历史
-
+libs: dropzone,nouislider, autosize, tabler-flags, tabler-payments, litepicker, tom-select
+layout: default
 ---
+
+<style>
+	.centered-form {
+		margin: 30px;
+
+	}
+	.custom-margin-1 {
+		margin-right: 10px;
+		margin-left: 10px;
+	}
+	.custom-margin-2 {
+		margin-top: 15px;
+
+	}
+	.btn-table {
+		height: 30px; /* 设置按钮高度为 40px，可以根据需要调整 */
+		line-height: 30px; /* 垂直居中文本 */
+		padding: 0 10px; /* 设置按钮内边距，使按钮内容居中显示 */
+	}
+	.btn-go {
+		margin-left: 5px;
+		height: 25px; /* 设置按钮高度为 40px，可以根据需要调整 */
+		line-height: 25px; /* 垂直居中文本 */
+		padding: 8px; /* 设置按钮内边距，使按钮内容居中显示 */
+	}
+	.go {
+		margin-left: 10px;
+		height: 25px; /* 设置按钮高度为 40px，可以根据需要调整 */
+		width: 40px;
+
+	}
+
+</style>
+
+<div class="centered-form">
+	<form >
+		<div class="card custom-margin-2">
+			<div class="card-header">
+				<h4 class="card-title">搜索条件</h4>
+			</div>
+			<div class="card-body">
+				<div class="row">
+					<div class="col-md-4 col-xl-4 custom-margin-1">
+						<label class="form-label">测评地点</label>
+						<input type="text" name="location" class="form-control" placeholder="请输入">
+
+					</div>
+
+					<div class="col-md-4 col-xl-4 custom-margin-1">
+						<label class="form-label">测评日期</label>
+						{% include ui/datepicker.html id="icon" layout="icon" %}
+
+					</div>
+
+					<div class="col-md-3 col-xl-3 custom-margin-1">
+						<label class="form-label">测评人员</label>
+						<input type="text" name="name" class="form-control" placeholder="请输入">
+					</div>
+				</div>
+				<div class="row custom-margin-2">
+					<div class="col-md-3 col-xl-3 custom-margin-1">
+						<label class="form-label">车辆品牌</label>
+						<input type="text" name="brand" class="form-control" placeholder="请输入">
+
+					</div>
+
+					<div class="col-md-5 col-xl-5 custom-margin-1">
+						<label class="form-label">车辆型号</label>
+						<input type="text" name="model" class="form-control" placeholder="型号/年份">
+
+					</div>
+
+					<div class="col-md-3 col-xl-3 custom-margin-1">
+						<label class="form-label">智驾版本</label>
+						<input type="text" name="version" class="form-control" placeholder="请输入">
+					</div>
+				</div>
+				<div class="row custom-margin-2">
+					<div class="col-md-11 col-xl-11 custom-margin-1">
+						<label class="form-label">测评路线</label>
+						<input type="text" name="path" class="form-control" placeholder="请输入">
+					</div>
+				</div>
+
+			</div>
+			<div class="card-footer text-md-center custom-margin-2">
+
+					<button type="button" id="button"  class="btn btn-primary w-25">搜索</button>
+
+			</div>
+		</div>
+	</form>
+	<div class="card">
+
+		<div class="card-body border-bottom py-3">
+
+			<div class="d-flex">
+				<div class="text-secondary">
+				搜索结果
+
+			   </div>
+				<div class="ms-auto text-secondary">共 <span id="resultCnt">0</span> 条结果</div>
+
+
+
+			</div>
+
+		</div>
+		<div class="table-responsive">
+			<table class="table card-table table-vcenter text-nowrap datatable">
+				<thead>
+				<tr>
+
+					<th>车辆品牌</th>
+					<th>车辆型号</th>
+					<th>智驾版本</th>
+					<th>测评地点</th>
+					<th>测评路线</th>
+					<th>测评时间</th>
+					<th>测评人员</th>
+					<th></th>
+				</tr>
+				</thead>
+
+				<tbody id="table-body"></tbody>
+			</table>
+		</div>
+		<div class="card-footer d-flex align-items-center">
+			<div class="text-secondary">
+
+				每页 10 条记录, 共
+				<span type="text" id="pageCnt"  >0</span>
+				页
+			</div>
+			<ul id="pagination" class="pagination m-0 ms-auto"></ul>
+		</div>
+	</div>
+</div>
+{% include ui/delete-warn.html id="delete-warn" size="sm" info="确定要删除本条记录吗?" %}
+<script>
+
+	document.addEventListener("DOMContentLoaded", function() {
+		refresh();
+		generatePagination()
+		document.getElementById("button").addEventListener('click',function(event){
+			currentlocation=document.getElementsByName("location")[0].value;
+			currentdate=document.getElementsByName("date")[0].value;
+			currentname=document.getElementsByName("name")[0].value;
+			currentbrand=document.getElementsByName("brand")[0].value;
+			currentmodel=document.getElementsByName("model")[0].value;
+			currentversion=document.getElementsByName("version")[0].value;
+			currentpath=document.getElementsByName("path")[0].value;
+			currentPage = 1;
+			refresh()
+		})
+	})
+</script>
+<script>
+	const resultCntElement=document.getElementById("resultCnt");
+	const pageCntElement=document.getElementById("pageCnt");
+	let currentlocation='';
+	let currentdate='';
+	let currentname='';
+	let currentbrand='';
+	let currentmodel='';
+	let currentversion='';
+	let currentpath='';
+	let totalPage = 1;
+	let currentPage = 1;
+	function refresh(){
+		const url = 'http://localhost:8080/refresh?' +
+			'location=' + encodeURIComponent(currentlocation) +
+			'&date=' + encodeURIComponent(currentdate) +
+			'&name=' + encodeURIComponent(currentname) +
+			'&brand=' + encodeURIComponent(currentbrand) +
+			'&model=' + encodeURIComponent(currentmodel) +
+			'&version=' + encodeURIComponent(currentversion) +
+			'&path=' + encodeURIComponent(currentpath) +
+			'&currentPage=' + encodeURIComponent(currentPage);
+
+		fetch(url, {
+			method: 'GET',
+
+		})
+			.then(response => {
+				if (response.ok) {
+					return response.json();
+				}
+				handle(0,[])
+				throw new Error('Network response was not ok.');
+			})
+			.then(data => {
+				console.log(data);
+				if(data.code===0){
+					handle(data.data.resultCnt,data.data.infoArrayList)
+				}
+				else {
+					handle(0,[])
+				}
+
+			})
+			.catch(error => {
+				console.error('Error:', error);
+				handle(0,[])
+			});
+	}
+	function handle(cnt,array){
+		deleteAllRow()
+		resultCntElement.textContent=cnt;
+		if(cnt>0){
+			totalPage=Math.floor(cnt/10)+(cnt%10>0?1:0)
+			pageCntElement.textContent=totalPage
+			if(currentPage>totalPage){
+				currentPage--
+				refresh()
+				return
+			}
+			else {
+				generatePagination();
+				for (let i=0;i<10;i++){
+					insertRow(array[i].id, array[i].brand,array[i].model,array[i].version,array[i].location,array[i].path,array[i].time,array[i].name)
+				}
+			}
+		}
+		else {
+			currentPage=1
+			totalPage=1
+			generatePagination();
+			pageCntElement.textContent=totalPage
+		}
+	}
+</script>
+<script>
+	let bid
+	function deleteAllRow() {
+		var tableBody = document.getElementById("table-body")
+		tableBody.innerHTML=''
+	}
+	function insertRow(id,newbrand,newmodel,newversion,newlocation,newpath,newtime,newname){
+		const deleteWarn=document.getElementById("delete-warn");
+		var tableBody = document.getElementById("table-body")
+		var row = document.createElement("tr")
+
+		var c1 = document.createElement("td")
+		c1.textContent = newbrand
+		row.appendChild(c1)
+
+		var c2 = document.createElement("td")
+		c2.textContent = newmodel
+		row.appendChild(c2)
+
+		var c3 = document.createElement("td")
+		c3.textContent = newversion
+		row.appendChild(c3)
+
+		var c4 = document.createElement("td")
+		c4.textContent = newlocation
+		row.appendChild(c4)
+
+		var c5 = document.createElement("td")
+		c5.textContent = newpath
+		row.appendChild(c5)
+
+		var c6 = document.createElement("td")
+		c6.textContent = newtime
+		row.appendChild(c6)
+
+		var c7 = document.createElement("td")
+		c7.textContent = newname
+		row.appendChild(c7)
+
+		var c8 = document.createElement("td");
+		var button1 = document.createElement("button");
+		button1.setAttribute("type", "button");
+		button1.setAttribute("name", id);
+		button1.setAttribute("class", "btn btn-table btn-primary ms-auto ");
+		button1.textContent = "打开";
+		button1.addEventListener('click',function(ev){
+			bid=this.name
+			console.log(bid)
+			const url = 'https://httpbin.org/get?' +
+				'id=' + encodeURIComponent(bid)
+			fetch(url, {
+				method: 'GET'
+			})
+				.then(response => {
+					if (response.ok) {
+						return response.json();
+					}
+					throw new Error('Network response was not ok.');
+				})
+				.then(data => {
+					console.log(data);
+				})
+				.catch(error => {
+					console.error('Error:', error);
+				})
+				.finally(e=>{
+					window.location.href = '{{ site.base }}/workbench.html'; // 重定向到指定页面
+				})
+
+		})
+		c8.appendChild(button1);
+
+
+		var button3 = document.createElement("button");
+		button3.setAttribute("type", "button");
+		button3.setAttribute("name", id);
+		button3.setAttribute("class", "btn btn-table btn-danger ms-3");
+		button3.textContent = "删除";
+		button3.addEventListener('click',function(ev){
+			bid=this.name
+			console.log(bid)
+			deleteWarn.classList.add('show');
+			deleteWarn.style.display = 'block';
+
+		})
+		c8.appendChild(button3);
+
+		row.appendChild(c8);
+
+		tableBody.appendChild(row);
+	}
+	function deleteN(){
+		const deleteWarn=document.getElementById("delete-warn");
+		deleteWarn.classList.add('hide');
+		deleteWarn.style.display = 'none';
+	}
+	function deleteY(){
+		const deleteWarn=document.getElementById("delete-warn");
+		deleteWarn.classList.add('hide');
+		deleteWarn.style.display = 'none';
+		console.log(bid)
+		const url = 'https://httpbin.org/get?' +
+			'id=' + encodeURIComponent(bid)
+		fetch(url, {
+			method: 'GET'
+		})
+			.then(response => {
+				if (response.ok) {
+					return response.json();
+				}
+				throw new Error('Network response was not ok.');
+			})
+			.then(data => {
+				console.log(data);
+			})
+			.catch(error => {
+				console.error('Error:', error);
+			})
+			.finally(e =>{
+				refresh()
+			})
+
+	}
+</script>
+<script>
+
+	const pagination = document.getElementById("pagination");
+	function updatePage(current,total) {
+		currentPage = current;
+		totalPage=total;
+		refresh()
+	}
+	// 生成分页控件
+	function generatePagination() {
+		pagination.innerHTML = ""; // 清空分页控件
+
+		// 添加上一页
+		pagination.appendChild(createPageItem("上一页", currentPage === 1, () => updatePage(currentPage - 1,totalPage)));
+
+		// 计算要显示的页码范围
+		let startPage = Math.max(1, currentPage - 2);
+		let endPage = Math.min(totalPage, startPage + 4);
+
+		// 处理省略号
+		if (endPage - startPage < 4) {
+			startPage = Math.max(1, endPage - 4);
+		}
+
+		// 添加页码
+		for (let i = startPage; i <= endPage; i++) {
+			pagination.appendChild(createPageItem(i, i === currentPage, () => updatePage(i,totalPage)));
+		}
+
+		// 添加下一页
+		pagination.appendChild(createPageItem("下一页", currentPage === totalPage, () => updatePage(currentPage + 1,totalPage)));
+
+		// 添加输入框和按钮
+		const input = document.createElement("input");
+		input.setAttribute("type", "text");
+		input.classList.add("go");
+		input.setAttribute("placeholder", "跳转");
+		pagination.appendChild(input);
+
+		const goButton = document.createElement("button");
+		goButton.classList.add("btn-go");
+		goButton.classList.add("btn");
+		goButton.textContent = "Go";
+		goButton.addEventListener("click", () => {
+			const page = parseInt(input.value);
+			if (page && page >= 1 && page <= totalPage) {
+				updatePage(page,totalPage);
+			}
+		});
+		pagination.appendChild(goButton);
+	}
+
+	// 创建一个分页项
+	function createPageItem(content, flag, onClick) {
+		const li = document.createElement("li");
+		li.classList.add("page-item");
+		if (flag) {
+			if(content==="下一页" || content==="上一页"){
+				li.classList.add("disabled");
+			}
+			else {
+				li.classList.add("active")
+			}
+		}
+
+		const a = document.createElement("a");
+		a.classList.add("page-link");
+		a.href = "#";
+		a.textContent = content;
+		a.addEventListener("click", (event) => {
+			event.preventDefault();
+			onClick();
+		});
+
+		li.appendChild(a);
+
+		return li;
+	}
+</script>
+
+

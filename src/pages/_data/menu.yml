@@ -281,51 +281,7 @@ extra:
       url: page-loader.html
       badge: New
 
-layout:
-  icon: layout-2
-  title: Layout
-  columns: 2
-  children:
-    horizontal:
-      url: layout-horizontal.html
-      title: Horizontal
-    boxed:
-      url: layout-boxed.html
-      title: Boxed
-      badge: New
-    vertical:
-      url: layout-vertical.html
-      title: Vertical
-    vertical-transparent:
-      url: layout-vertical-transparent.html
-      title: Vertical transparent
-    vertical-right:
-      url: layout-vertical-right.html
-      title: Right vertical
-    condensed:
-      url: layout-condensed.html
-      title: Condensed
-    combo:
-      url: layout-combo.html
-      title: Combined
-    navbar-dark:
-      url: layout-navbar-dark.html
-      title: Navbar dark
-    navbar-sticky:
-      url: layout-navbar-sticky.html
-      title: Navbar sticky
-    navbar-overlap:
-      url: layout-navbar-overlap.html
-      title: Navbar overlap
-    rtl-mode:
-      url: layout-rtl.html
-      title: RTL mode
-    fluid:
-      url: layout-fluid.html
-      title: Fluid
-    fluid-vertical:
-      url: layout-fluid-vertical.html
-      title: Fluid vertical
+
 
 icons:
   title: "%ICONS_COUNT% icons"
