@@ -1,5 +1,43 @@
 ---
 
 menu: 工作台
-
+libs: dropzone,nouislider, autosize, tabler-flags, tabler-payments, litepicker, tom-select
+layout: default
 ---
+
+<script>
+	document.addEventListener('DOMContentLoaded', function() {
+		// 每10秒执行一次检测登录状态的函数
+		setInterval(checkLoginStatus, 10000);
+	});
+	function checkLoginStatus() {
+		// 发送 AJAX 请求到服务器
+		// 例如，使用 fetch API 或者 XMLHttpRequest
+		fetch('http://localhost:9090/login/checkCookie',{
+			method: 'GET',
+			credentials: 'include'
+		})
+			.then(response => {
+				// 处理服务器响应，这里可以根据服务器返回的数据进行相应的逻辑处理
+				if (response.ok) {
+					return response.json();
+				} else {
+					window.location.href = '{{ site.base }}/sign-in.html';
+					throw new Error('Network response was not ok.');
+				}
+			})
+			.then(data => {
+				// 在这里处理服务器返回的数据，例如检查登录状态
+				if (data.code===0) {
+
+				} else {
+					window.location.href = '{{ site.base }}/sign-in.html';
+				}
+			})
+			.catch(error => {
+				// 处理错误
+				console.error('There was a problem with the fetch operation:', error);
+				window.location.href = '{{ site.base }}/sign-in.html';
+			});
+	}
+</script>

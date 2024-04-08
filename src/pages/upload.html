@@ -125,7 +125,7 @@ layout: default
 	let controller = new AbortController();
 	let signal = controller.signal;
 	document.addEventListener("DOMContentLoaded", function() {
-
+		setInterval(checkLoginStatus, 10000);
 		const loading = document.getElementById("loading")
 		const success = document.getElementById("success")
 		const fail = document.getElementById("fail")
@@ -169,11 +169,12 @@ layout: default
 			formData.append('path', path.value);
 			formData.append('info', info.value);
 
-			const url=`https://httpbin.org/post`
+			const url=`http://localhost:9090/history/upload`
 			fetch(url, {
 				method: 'POST',
 				body: formData,
-				signal: signal
+				signal: signal,
+				credentials: 'include'
 			})
 				.then(response => {
 					loading.classList.add('hide');
@@ -187,8 +188,15 @@ layout: default
 				})
 				.then(data => {
 					console.log(data);
-					success.classList.add('show');
-					success.style.display = 'block';
+					if (data.code===0){
+						success.classList.add('show');
+						success.style.display = 'block';
+					}
+					else {
+						fail.classList.add('show');
+						fail.style.display = 'block'
+					}
+
 
 				})
 				.catch(error => {
@@ -219,5 +227,35 @@ layout: default
 		modal.classList.add('hide');
 		modal.style.display = 'none';
 		controller.abort();
+	}
+	function checkLoginStatus() {
+		// 发送 AJAX 请求到服务器
+		// 例如，使用 fetch API 或者 XMLHttpRequest
+		fetch('http://localhost:9090/login/checkCookie',{
+			method: 'GET',
+			credentials: 'include'
+		})
+			.then(response => {
+				// 处理服务器响应，这里可以根据服务器返回的数据进行相应的逻辑处理
+				if (response.ok) {
+					return response.json();
+				} else {
+					window.location.href = '{{ site.base }}/sign-in.html';
+					throw new Error('Network response was not ok.');
+				}
+			})
+			.then(data => {
+				// 在这里处理服务器返回的数据，例如检查登录状态
+				if (data.code===0) {
+
+				} else {
+					window.location.href = '{{ site.base }}/sign-in.html';
+				}
+			})
+			.catch(error => {
+				// 处理错误
+				console.error('There was a problem with the fetch operation:', error);
+				window.location.href = '{{ site.base }}/sign-in.html';
+			});
 	}
 </script>

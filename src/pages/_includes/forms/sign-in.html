@@ -1,3 +1,4 @@
+
 <form action="https://httpbin.org/get" method="get" autocomplete="off" novalidate>
 	<div class="mb-3">
 		<label class="form-label">用户名</label>
@@ -16,15 +17,22 @@
 </form>
 {% include ui/fail.html id="fail" size="sm" info="登录失败" %}
 <script>
+
 	document.addEventListener('DOMContentLoaded', function() {
 		const button = document.getElementById("button")
 		const fail = document.getElementById("fail")
 		const username=document.getElementsByName("username")[0]
 		const password=document.getElementsByName("password")[0]
+
 		button.addEventListener('click', function(event) {
-			const url=`https://httpbin.org/get?username=${encodeURIComponent(username.value)}&password=${encodeURIComponent(password.value)}`
+			const url=`http://localhost:9090/login/check`
+			const formData = new FormData();
+			formData.append("username",username.value)
+			formData.append("password",password.value)
 			fetch(url, {
-				method: 'GET',
+				method: 'POST',
+				body: formData,
+				credentials: 'include'
 			})
 				.then(response => {
 					if (response.ok) {
@@ -36,9 +44,12 @@
 				})
 				.then(data => {
 					console.log(data);
-					const isValid = true; // 假设提交验证结果为 true
-					if (isValid) {
+					if (data.code===0) {
 						window.location.href = '{{ site.base }}/workbench.html'; // 重定向到指定页面
+					}
+					else {
+						fail.classList.add('show');
+						fail.style.display = 'block';
 					}
 				})
 				.catch(error => {
@@ -49,6 +60,13 @@
 
 
 		});
+
+		document.addEventListener("keypress", function(event) {
+			if (event.key === "Enter") { // 检查按下的键是否是回车键
+				event.preventDefault(); // 阻止默认的回车键行为
+				button.click(); // 模拟点击按钮
+			}
+		});
 	});
 	function closeFailModal(modalId) {
 		var modal = document.getElementById(modalId); // 获取要关闭的模态框元素
@@ -56,4 +74,5 @@
 		modal.style.display = 'none';
 		location.reload();
 	}
+
 </script>

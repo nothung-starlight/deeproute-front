@@ -142,10 +142,13 @@ layout: default
 		</div>
 	</div>
 </div>
+{% include ui/success.html id="success" size="sm" info="删除成功" %}
+{% include ui/fail.html id="fail" size="sm" info="删除失败" %}
 {% include ui/delete-warn.html id="delete-warn" size="sm" info="确定要删除本条记录吗?" %}
 <script>
 
 	document.addEventListener("DOMContentLoaded", function() {
+		setInterval(checkLoginStatus, 10000);
 		refresh();
 		generatePagination()
 		document.getElementById("button").addEventListener('click',function(event){
@@ -174,7 +177,7 @@ layout: default
 	let totalPage = 1;
 	let currentPage = 1;
 	function refresh(){
-		const url = 'http://localhost:8080/refresh?' +
+		const url = 'http://localhost:9090/history/getHistoryList?' +
 			'location=' + encodeURIComponent(currentlocation) +
 			'&date=' + encodeURIComponent(currentdate) +
 			'&name=' + encodeURIComponent(currentname) +
@@ -186,7 +189,7 @@ layout: default
 
 		fetch(url, {
 			method: 'GET',
-
+			credentials: 'include'
 		})
 			.then(response => {
 				if (response.ok) {
@@ -198,7 +201,7 @@ layout: default
 			.then(data => {
 				console.log(data);
 				if(data.code===0){
-					handle(data.data.resultCnt,data.data.infoArrayList)
+					handle(data.data.resultCnt,data.data.historyArrayList)
 				}
 				else {
 					handle(0,[])
@@ -223,8 +226,8 @@ layout: default
 			}
 			else {
 				generatePagination();
-				for (let i=0;i<10;i++){
-					insertRow(array[i].id, array[i].brand,array[i].model,array[i].version,array[i].location,array[i].path,array[i].time,array[i].name)
+				for (let i=0;i<array.length;i++){
+					insertRow(array[i].id, array[i].brand,array[i].model,array[i].version,array[i].location,array[i].path,formatTime(array[i].time),array[i].name)
 				}
 			}
 		}
@@ -284,10 +287,11 @@ layout: default
 		button1.addEventListener('click',function(ev){
 			bid=this.name
 			console.log(bid)
-			const url = 'https://httpbin.org/get?' +
+			const url = 'http://localhost:9090/history/setCurrentHistoryId?' +
 				'id=' + encodeURIComponent(bid)
 			fetch(url, {
-				method: 'GET'
+				method: 'GET',
+				credentials: 'include'
 			})
 				.then(response => {
 					if (response.ok) {
@@ -334,30 +338,95 @@ layout: default
 	}
 	function deleteY(){
 		const deleteWarn=document.getElementById("delete-warn");
+		const success = document.getElementById("success")
+		const fail = document.getElementById("fail")
 		deleteWarn.classList.add('hide');
 		deleteWarn.style.display = 'none';
 		console.log(bid)
-		const url = 'https://httpbin.org/get?' +
+		const url = 'http://localhost:9090/history/deleteHistory?' +
 			'id=' + encodeURIComponent(bid)
 		fetch(url, {
-			method: 'GET'
+			method: 'GET',
+			credentials: 'include'
 		})
 			.then(response => {
 				if (response.ok) {
 					return response.json();
 				}
+				fail.classList.add('show');
+				fail.style.display = 'block';
 				throw new Error('Network response was not ok.');
 			})
 			.then(data => {
 				console.log(data);
+				if (data.code===0){
+					success.classList.add('show');
+					success.style.display = 'block';
+				}
+				else {
+					fail.classList.add('show');
+					fail.style.display = 'block';
+				}
+
 			})
 			.catch(error => {
+				fail.classList.add('show');
+				fail.style.display = 'block';
 				console.error('Error:', error);
 			})
-			.finally(e =>{
-				refresh()
-			})
 
+	}
+	function closeSuccessModal(modalId) {
+		var modal = document.getElementById(modalId); // 获取要关闭的模态框元素
+		modal.classList.add('hide');
+		modal.style.display = 'none';
+		refresh()
+	}
+	function closeFailModal(modalId) {
+		var modal = document.getElementById(modalId); // 获取要关闭的模态框元素
+		modal.classList.add('hide');
+		modal.style.display = 'none';
+		refresh()
+	}
+	function checkLoginStatus() {
+		// 发送 AJAX 请求到服务器
+		// 例如，使用 fetch API 或者 XMLHttpRequest
+		fetch('http://localhost:9090/login/checkCookie',{
+			method: 'GET',
+			credentials: 'include'
+		})
+			.then(response => {
+				// 处理服务器响应，这里可以根据服务器返回的数据进行相应的逻辑处理
+				if (response.ok) {
+					return response.json();
+				} else {
+					window.location.href = '{{ site.base }}/sign-in.html';
+					throw new Error('Network response was not ok.');
+				}
+			})
+			.then(data => {
+				// 在这里处理服务器返回的数据，例如检查登录状态
+				if (data.code===0) {
+
+				} else {
+					window.location.href = '{{ site.base }}/sign-in.html';
+				}
+			})
+			.catch(error => {
+				// 处理错误
+				console.error('There was a problem with the fetch operation:', error);
+				window.location.href = '{{ site.base }}/sign-in.html';
+			});
+	}
+	function formatTime(timeString) {
+		const date = new Date(timeString);
+		const year = date.getFullYear().toString()
+		const month = (date.getMonth() + 1).toString().padStart(2, '0');
+		const day = date.getDate().toString().padStart(2, '0');
+		const hours = date.getHours().toString().padStart(2, '0');
+		const minutes = date.getMinutes().toString().padStart(2, '0');
+		const seconds = date.getSeconds().toString().padStart(2, '0');
+		return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 	}
 </script>
 <script>
